@@ -21,7 +21,7 @@ jobs:
     - name: Clone repository
       uses: actions/checkout@v3
       with:
-        repository: gaggioaxel/ekeel
+        repository: teldh/ekeel
         ref: main
 
     - name: Build site 🏗️
