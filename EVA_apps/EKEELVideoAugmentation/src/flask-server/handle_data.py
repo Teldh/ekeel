@@ -1,3 +1,17 @@
+"""
+Handle data module for the Flask server.
+
+This module provides functions to interact with the MongoDB database and retrieve data related to video annotations.
+
+Functions
+---------
+get_graphs(video_id)
+    Retrieves all graphs associated with the given video ID.
+check_graphs(video_id, email)
+    Checks if there are any graphs associated with the given video ID and email.
+get_definitions_fragments(email, video_id, fragments)
+    Retrieves definitions for the specified email, video ID, and fragments.
+"""
 from rdflib import Namespace
 
 
@@ -11,6 +25,19 @@ skos = Namespace("http://www.w3.org/2004/02/skos#")
 
 
 def get_graphs(video_id):
+    """
+    Retrieves all graphs associated with the given video ID.
+
+    Parameters
+    ----------
+    video_id : str
+        The ID of the video.
+
+    Returns
+    -------
+    list
+        A list of dictionaries containing annotator ID and video ID.
+    """
     db = data.load_db()
     collection = db.graphs
     q = collection.find({"video_id":video_id})
@@ -19,8 +46,24 @@ def get_graphs(video_id):
         res.append({"annotator_id": graph["annotator_id"], "video_id": video_id})
     return res
 
+
 # check if exist video annotated by user (email)
 def check_graphs(video_id, email):
+    """
+    Checks if there are any graphs associated with the given video ID and email.
+
+    Parameters
+    ----------
+    video_id : str
+        The ID of the video.
+    email : str
+        The email address associated with the graphs.
+
+    Returns
+    -------
+    list
+        A list of dictionaries containing annotator ID and video ID.
+    """
     db = data.load_db()
     collection = db.graphs
     q = collection.find({"video_id":video_id,"email":email})
@@ -29,7 +72,25 @@ def check_graphs(video_id, email):
         res.append({"annotator_id": graph["annotator_id"], "video_id": video_id})
     return res
 
+
 def get_definitions_fragments(email, video_id, fragments):
+    """
+    Retrieves definitions for the specified email, video ID, and fragments.
+
+    Parameters
+    ----------
+    email : str
+        The email address associated with the definitions.
+    video_id : str
+        The ID of the video.
+    fragments : list
+        A list of fragments with start and end times.
+
+    Returns
+    -------
+    list
+        A list of definitions for the specified fragments.
+    """
     db = data.load_db()
     collection = db.graphs
     print(email, video_id)

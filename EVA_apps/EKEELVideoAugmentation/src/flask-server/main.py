@@ -62,12 +62,37 @@ mail = Mail(app)
 
 # generate a random string of lenght N composed of lowercase letters and numbers
 def generate_code(N=6):
+    """
+    Generates a random string of length N composed of lowercase letters and numbers.
+
+    Parameters
+    ----------
+    N : int, optional
+        The length of the generated string (default is 6).
+
+    Returns
+    -------
+    str
+        The generated random string.
+    """
     return ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(N))
 
 
 # Get the speech from a youtube video URL
 @app.route('/api/youtube_transcript', methods=["GET", "POST"])
 def speech_from_youtube():
+    """
+    Retrieves the speech transcript from a YouTube video URL.
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    flask.Response
+        A JSON response containing the speech transcript and video metadata.
+    """
     req = request.get_json(force=True)
     videoId=req.get('video_id')
 
@@ -92,29 +117,90 @@ def speech_from_youtube():
     result = jsonify(subs_dict)
     return result
 
+
 # get the integer part of a number
 # ex: for 2.5 it will return 2
 def get_integer_part(number):
+    """
+    Get the integer part of a number.
+
+    Parameters
+    ----------
+    number : float
+        Input number
+
+    Returns
+    -------
+    float
+        Integer part of the number
+    """
     split_number = math.modf(number)
     return split_number[1]
     
 class VTStitles(db.EmbeddedDocument):
+    """
+    Embedded document for video text segmentation titles.
+
+    Attributes
+    ----------
+    start_end_seconds : list
+        List of start and end times in seconds
+    text : str
+        Text content of the title
+    xywh_normalized : list
+        List of normalized bounding box coordinates
+    """
     start_end_seconds = db.ListField(db.DecimalField())
     text = db.StringField()
     xywh_normalized = db.ListField(db.DecimalField())
     
 class VideoTextSegmentation(db.Document):
+    """
+    Document for video text segmentation data.
+
+    Attributes
+    ----------
+    video_id : str
+        Identifier for the video
+    slides_percentage : float
+        Percentage of slides in the video
+    slide_titles : list
+        List of VTStitles embedded documents
+    slide_startends : list
+        List of start and end times for slides
+    slidish_frames_startend : list
+        List of start and end frames for slides
+    """
     video_id = db.StringField()
     slides_percentage = db.DecimalField()
     slide_titles = db.EmbeddedDocumentListField(VTStitles)
     slide_startends = db.ListField(db.ListField(db.DecimalField()))
     slidish_frames_startend = db.ListField(db.ListField(db.IntField()))
 
-
-
-
 #image of the mongodb collection of the database, used by mongoengine
 class Videos(db.Document):
+    """
+    Document for video metadata.
+
+    Attributes
+    ----------
+    video_id : str
+        Identifier for the video
+    title : str
+        Title of the video
+    creator : str
+        Creator of the video
+    duration : str
+        Duration of the video
+    segment_starts : list
+        List of segment start times
+    segment_ends : list
+        List of segment end times
+    extracted_keywords : list
+        List of extracted keywords
+    language : str
+        Language of the video
+    """
     video_id = db.StringField()
     title = db.StringField()
     creator = db.StringField()
@@ -126,6 +212,26 @@ class Videos(db.Document):
 
 #image of the mongodb collection of the database, used by mongoengine
 class VideoStatistics(db.Document):
+    """
+    Document for video statistics.
+
+    Attributes
+    ----------
+    video_url : str
+        URL of the video
+    amountViewers : int
+        Number of viewers
+    total_fragment_clicks : int
+        Total number of fragment clicks
+    total_node_clicks : int
+        Total number of node clicks
+    total_transcript_clicks : int
+        Total number of transcript clicks
+    total_searchbar_clicks : int
+        Total number of search bar clicks
+    viewersList : list
+        List of viewer emails
+    """
     video_url = db.StringField()
     amountViewers = db.IntField()
     total_fragment_clicks = db.IntField()
@@ -135,12 +241,36 @@ class VideoStatistics(db.Document):
     viewersList = db.ListField(db.StringField())
 
 #image of the mongodb collection of the database, used by mongoengine
-class HisloryLog(db.EmbeddedDocument):
+class HistoryLog(db.EmbeddedDocument):
+    """
+    Embedded document for history logs.
+
+    Attributes
+    ----------
+    date : datetime
+        Date of the log entry
+    request : str
+        Request content
+    """
     date = db.DateTimeField()
     request = db.StringField()
 
 #image of the mongodb collection of the database, used by mongoengine
 class Fragment(db.EmbeddedDocument):
+    """
+    Embedded document for video fragments.
+
+    Attributes
+    ----------
+    name : str
+        Name of the fragment
+    start : str
+        Start time of the fragment
+    end : str
+        End time of the fragment
+    progress : int
+        Progress of the fragment
+    """
     name = db.StringField()
     start = db.StringField()
     end =  db.StringField()
@@ -148,6 +278,32 @@ class Fragment(db.EmbeddedDocument):
 
 #image of the mongodb collection of the database, used by mongoengine
 class VideoHistory(db.EmbeddedDocument):
+    """
+    Embedded document for video history.
+
+    Attributes
+    ----------
+    video_url : str
+        URL of the video
+    video_watchtime : int
+        Watch time of the video
+    fragment_clicks : int
+        Number of fragment clicks
+    node_clicks : int
+        Number of node clicks
+    transcript_clicks : int
+        Number of transcript clicks
+    searchbar_clicks : int
+        Number of search bar clicks
+    notes : str
+        Notes for the video
+    lastChangesDate : datetime
+        Date of the last changes
+    fragments_progress : list
+        List of Fragment embedded documents
+    logs : list
+        List of HistoryLog embedded documents
+    """
     video_url = db.StringField()
     video_watchtime = db.IntField()
     fragment_clicks = db.IntField()
@@ -157,12 +313,57 @@ class VideoHistory(db.EmbeddedDocument):
     notes = db.StringField()
     lastChangesDate = db.DateTimeField()
     fragments_progress = db.EmbeddedDocumentListField(Fragment)
-    logs = db.EmbeddedDocumentListField(HisloryLog)
+    logs = db.EmbeddedDocumentListField(HistoryLog)
 
 
 # image of the mongodb collection of the database, used by mongoengine
 # also have some methods related to the fields of the class
 class Student(db.Document):
+    """
+    Document for student data.
+
+    Attributes
+    ----------
+    name : str
+        First name of the student
+    surname : str
+        Last name of the student
+    email : str
+        Email address of the student
+    password_hash : str
+        Hashed password of the student
+    code_reset_password : str
+        Code for resetting password
+    nb_try_code_reset_password : int
+        Number of attempts for resetting password
+    code_delete_account : str
+        Code for deleting account
+    nb_try_code_delete_account : int
+        Number of attempts for deleting account
+    video_history_list : list
+        List of VideoHistory embedded documents
+
+    Methods
+    -------
+    hash_password(password)
+        Hash the student's password
+    verify_password(password)
+        Verify the student's password
+    hash_code_reset_password(code)
+        Hash the code for resetting password
+    verify_code_reset_password(code)
+        Verify the code for resetting password
+    hash_code_delete_account(code)
+        Hash the code for deleting account
+    verify_code_delete_account(code)
+        Verify the code for deleting account
+    generate_auth_token(expires_in)
+        Generate an authentication token
+    verify_auth_token(token)
+        Verify an authentication token
+    get_sorted_history(by)
+        Get sorted video history
+    """
     name = db.StringField()
     surname = db.StringField()
     email = db.StringField()
@@ -272,6 +473,33 @@ class Student(db.Document):
 #image of the mongodb collection of the database, used by mongoengine
 # this is used to store the accounts that are not verified yet with the confirmation code sent by mail
 class UnverifiedStudent(db.Document):
+    """
+    Document for unverified student data.
+
+    Attributes
+    ----------
+    name : str
+        First name of the student
+    surname : str
+        Last name of the student
+    email : str
+        Email address of the student
+    password_hash : str
+        Hashed password of the student
+    code_on_creation_hash : str
+        Code for account creation
+    nb_try_code_on_creation : int
+        Number of attempts for account creation
+
+    Methods
+    -------
+    hash_password(password)
+        Hash the student's password
+    hash_code_on_creation(code)
+        Hash the code for account creation
+    verify_code_on_creation(code)
+        Verify the code for account creation
+    """
     name = db.StringField()
     surname = db.StringField()
     email = db.StringField()
@@ -302,6 +530,21 @@ class UnverifiedStudent(db.Document):
 #function used by the authentication system. If it returns true, the user is considered as logged in, false he's not
 @auth.verify_password
 def verify_password(email_or_token, password):
+    """
+    Verify user password or token for authentication.
+
+    Parameters
+    ----------
+    email_or_token : str
+        Email or authentication token
+    password : str
+        User password
+
+    Returns
+    -------
+    bool
+        True if authentication is successful, False otherwise
+    """
     # first try to authenticate by token
     student = Student.verify_auth_token(email_or_token)
     if not student:
@@ -315,6 +558,14 @@ def verify_password(email_or_token, password):
 # api to call to create a new account
 @app.route('/api/register', methods=['POST'])
 def new_student():
+    """
+    Register a new student account.
+
+    Returns
+    -------
+    flask.Response
+        JSON response with the student's email
+    """
     email_input = request.json.get('email')
     password_input = request.json.get('password')
     name_input = request.json.get('name')
@@ -348,6 +599,14 @@ def new_student():
 # api to call to finalize your account creation (verify that your code is correct)
 @app.route('/api/register/verify', methods=['POST'])
 def verify_mail():
+    """
+    Verify email and code for account creation.
+
+    Returns
+    -------
+    flask.Response
+        JSON response with the student's email
+    """
     email_input = request.json.get('email')
     code_input = request.json.get('code')
     if email_input is None or code_input is None:
@@ -373,6 +632,14 @@ def verify_mail():
 # api to call to retrieve your password, it will send you a code by mail that you will need to return with your new password to the next api to finalize the operation
 @app.route('/api/retrieve_password', methods=['POST'])
 def send_code_to_reset_password_by_mail():
+    """
+    Send code to reset password via email.
+
+    Returns
+    -------
+    flask.Response
+        JSON response with the student's email
+    """
     email_input = request.json.get('email')
     if email_input is None:
         abort(400)    # missing arguments
@@ -392,6 +659,14 @@ def send_code_to_reset_password_by_mail():
 # api to call to reset your password, you need to have the right code to validate the operation
 @app.route('/api/retrieve_password/verify', methods=['POST'])
 def verify_code_and_change_password():
+    """
+    Verify code and change password.
+
+    Returns
+    -------
+    flask.Response
+        JSON response with the student's email
+    """
     email_input = request.json.get('email')
     code_input = request.json.get('code')
     new_password_input = request.json.get('password')
@@ -421,6 +696,14 @@ def verify_code_and_change_password():
 @auth.login_required
 #the above line require that the credentials (mail/password or token) are sent in the request to login th user
 def change_name_and_surname():
+    """
+    Change student's name and surname.
+
+    Returns
+    -------
+    flask.Response
+        JSON response with the student's email, new name, and new surname
+    """
     name_input = request.json.get('name')
     surname_input = request.json.get('surname')
     if name_input is None or surname_input is None:
@@ -436,6 +719,14 @@ def change_name_and_surname():
 @app.route('/api/delete_account', methods=['POST'])
 @auth.login_required
 def send_code_to_delete_account_by_mail():
+    """
+    Send code to delete account via email.
+
+    Returns
+    -------
+    flask.Response
+        JSON response with the student's email
+    """
     email_input = request.json.get('email')
     if email_input is None:
         abort(400)    # missing arguments
@@ -456,6 +747,14 @@ def send_code_to_delete_account_by_mail():
 @app.route('/api/delete_account/verify', methods=['POST'])
 @auth.login_required
 def verify_code_and_delete_account():
+    """
+    Verify code and delete account.
+
+    Returns
+    -------
+    flask.Response
+        JSON response with the student's email
+    """
     email_input = request.json.get('email')
     code_input = request.json.get('code')
     if email_input is None or code_input is None:
@@ -481,12 +780,28 @@ def verify_code_and_delete_account():
 @app.route('/api/get_user_infos')
 @auth.login_required
 def get_student():
+    """
+    Get student's name, surname, and email.
+
+    Returns
+    -------
+    flask.Response
+        JSON response with the student's name, surname, and email
+    """
     return jsonify({'name': g.student.name, 'surname':g.student.surname, 'email': g.student.email})
 
 #return an authentication token, valid for a certain amount of time
 @app.route('/api/token')
 @auth.login_required
 def get_auth_token():
+    """
+    Get authentication token.
+
+    Returns
+    -------
+    flask.Response
+        JSON response with the token, duration, name, and surname
+    """
     token = g.student.generate_auth_token()
     return jsonify({'token': token, 'duration': None, 'name': g.student.name, 'surname':g.student.surname})
 
@@ -495,6 +810,14 @@ def get_auth_token():
 @app.route('/api/update_user_history',  methods=['POST'])
 @auth.login_required
 def add_history():
+    """
+    Update user history for a specific video.
+
+    Returns
+    -------
+    flask.Response
+        JSON response with the student's email
+    """
     student= g.student
     #get data from request
     video_url_input = request.json.get('url')
@@ -545,7 +868,7 @@ def add_history():
         videoHistory.searchbar_clicks = videoHistory.searchbar_clicks + searchbar_clicks_input
         videoHistory.lastChangesDate = datetime.now()
 
-        new_log = HisloryLog(date = datetime.now(), request = str(request.json) )
+        new_log = HistoryLog(date = datetime.now(), request = str(request.json) )
         videoHistory.logs.append(new_log)
 
     except:
@@ -562,7 +885,7 @@ def add_history():
 
         videoHistory = VideoHistory(video_url = video_url_input, video_watchtime = video_watchtime_input, fragment_clicks = fragment_clicks_input, node_clicks = node_clicks_input, transcript_clicks = transcript_clicks_input,  searchbar_clicks = searchbar_clicks_input, notes = notes_input, lastChangesDate = datetime.now())
 
-        new_log = HisloryLog(date = datetime.now(), request = str(request.json) )
+        new_log = HistoryLog(date = datetime.now(), request = str(request.json) )
         videoHistory.logs.append(new_log)
 
         if fragments_input is not None:
@@ -599,6 +922,14 @@ def add_history():
 @app.route('/api/get_user_history')
 @auth.login_required
 def get_history():
+    """
+    Get user's video history.
+
+    Returns
+    -------
+    flask.Response
+        JSON response with the student's email, video history, and video titles
+    """
     student:Student = g.student
     video_title_list = []
     
@@ -614,20 +945,22 @@ def get_history():
         #print(video," ",get_video_title_from_url(video.video_url.split("watch?v=")[1]))
     
     return (jsonify({'email': student.email, 'videoHistory' : history_list, 'videoHistoryTitles': video_title_list}), 201)
-"""
-  video_title_list.append(get_video_title_from_url(i.video_url.split("watch?v=")[1]))
-        print(i," ",get_video_title_from_url(i.video_url.split("watch?v=")[1]))
-
-
-        try:
-            video_title_list.append(get_video_title_from_url(i.video_url.split("watch?v=")[1]))
-            print(i," ",get_video_title_from_url(i.video_url.split("watch?v=")[1]))
-        except Exception:
-            pass
-"""
 
 # used in the function above to get youtube video title based on their id
 def get_video_title_from_url(video_id):
+    """
+    Get YouTube video title based on video ID.
+
+    Parameters
+    ----------
+    video_id : str
+        YouTube video ID
+
+    Returns
+    -------
+    str
+        Video title
+    """
     #print("GET VIDEO: ",video_id)
     params = {"format": "json", "url": "https://www.youtube.com/watch?v=%s" % video_id}
     url = "https://www.youtube.com/oembed"
@@ -649,6 +982,19 @@ def get_video_title_from_url(video_id):
 @app.route('/api/get_fragments/<string:video_id>')
 @auth.login_required
 def get_fragments(video_id):
+    """
+    Get video fragments and their progress.
+
+    Parameters
+    ----------
+    video_id : str
+        Identifier for the video
+
+    Returns
+    -------
+    flask.Response
+        JSON response with the student's email, fragments, and keywords
+    """
     student= g.student
     video_url = "https://www.youtube.com/watch?v=%s" % video_id
     video_fragment_progress = None
@@ -700,7 +1046,14 @@ def get_fragments(video_id):
 @app.route('/api/get_catalog')
 @auth.login_required
 def get_catalog():
+    """
+    Get list of all available videos in the database.
 
+    Returns
+    -------
+    flask.Response
+        JSON response with the video catalog
+    """
     graphs = Graphs.objects()
     videos = Videos.objects()
 
@@ -718,6 +1071,24 @@ def get_catalog():
 
 #image of the mongodb collection of the database, used by mongoengine
 class Graphs(db.Document):
+    """
+    Document for graph data.
+
+    Attributes
+    ----------
+    video_id : str
+        Identifier for the video
+    annotator_name : str
+        Name of the annotator
+    annotator_id : str
+        Identifier for the annotator
+    email : str
+        Email of the annotator
+    graph : dict
+        Graph data
+    conceptVocabulary : dict
+        Concept vocabulary data
+    """
     video_id = db.StringField()
     annotator_name = db.StringField()
     annotator_id = db.StringField()
@@ -730,6 +1101,19 @@ class Graphs(db.Document):
 @app.route('/api/get_graph/<string:video_id>')
 @auth.login_required
 def get_graph(video_id=None):
+    """
+    Get complete JSON graph for a video.
+
+    Parameters
+    ----------
+    video_id : str, optional
+        Identifier for the video
+
+    Returns
+    -------
+    flask.Response
+        JSON response with the student's email, graph, and concept vocabulary
+    """
     if video_id is None:
         abort(400, "The video id is missing")    # missing arguments
     student= g.student
@@ -752,7 +1136,21 @@ def get_graph(video_id=None):
 # return the image of a fragment, the image is stored on the local files of the server
 @app.route("/api/get_image/<string:video_id>/<int:fragment_index>")
 def get_image(video_id=None, fragment_index=None ):
+    """
+    Get image of a video fragment.
 
+    Parameters
+    ----------
+    video_id : str, optional
+        Identifier for the video
+    fragment_index : int, optional
+        Index of the fragment
+
+    Returns
+    -------
+    flask.Response
+        Image file response
+    """
     if video_id is None or fragment_index is None:
         abort(400, "The video id or the image name is missing")    # missing arguments
 
@@ -778,6 +1176,19 @@ def get_image(video_id=None, fragment_index=None ):
 @app.route('/api/graph_id/<video_id>')
 @auth.login_required
 def graph_id(video_id):
+    """
+    Get graph user IDs for a given video.
+
+    Parameters
+    ----------
+    video_id : str
+        Identifier for the video
+
+    Returns
+    -------
+    dict
+        Dictionary containing list of graph IDs
+    """
     print("***** EKEEL - Video Augmentation: main.py::graph_id(): Inizio ******")
     student= g.student
     graph_list = handle_data.check_graphs(video_id,student.email)
@@ -795,6 +1206,21 @@ def graph_id(video_id):
 @app.route('/api/graph/<annotator_id>/<video_id>')
 @auth.login_required
 def graph(annotator_id, video_id):
+    """
+    Get graph for a given video and annotator.
+
+    Parameters
+    ----------
+    annotator_id : str
+        Identifier for the annotator
+    video_id : str
+        Identifier for the video
+
+    Returns
+    -------
+    dict
+        Dictionary containing concepts list and concept vocabulary
+    """
     concept_graph = data.build_array(annotator_id, video_id)
 
     # old: return {"conceptsList": concept_graph }
@@ -813,7 +1239,14 @@ def graph(annotator_id, video_id):
 @app.route('/api/GetVideoTypeAndPrerequisite')
 @auth.login_required
 def GetVideoTypeAndPrerequisite():
+    """
+    Get video type and prerequisite information.
 
+    Returns
+    -------
+    dict
+        Dictionary containing video type and prerequisite information
+    """
     client = pymongo.MongoClient(
         "mongodb+srv://"+MONGO_CLUSTER_USERNAME+":"+MONGO_CLUSTER_PASSWORD+"@clusteredurell.z8aeh.mongodb.net/edurell?retryWrites=true&w=majority")
 
@@ -914,7 +1347,21 @@ def GetVideoTypeAndPrerequisite():
 @app.route('/api/ConceptVideoData/<video_id_list>/<concept_searched>')
 @auth.login_required
 def ConceptVideoData(video_id_list, concept_searched):
+    """
+    Get concept video data for a list of videos.
 
+    Parameters
+    ----------
+    video_id_list : str
+        Comma-separated list of video IDs
+    concept_searched : str
+        Concept to search for
+
+    Returns
+    -------
+    str
+        JSON string containing concept video data
+    """
     #pymongo db config for query sparql
     client = pymongo.MongoClient(
             "mongodb+srv://"+MONGO_CLUSTER_USERNAME+":"+MONGO_CLUSTER_PASSWORD+"@clusteredurell.z8aeh.mongodb.net/edurell?retryWrites=true&w=majority")
@@ -1231,7 +1678,19 @@ def ConceptVideoData(video_id_list, concept_searched):
 @app.route('/api/testm/<video_id>')
 @auth.login_required
 def testm(video_id):
+    """
+    Test function for querying video data.
 
+    Parameters
+    ----------
+    video_id : str
+        Identifier for the video
+
+    Returns
+    -------
+    dict
+        Dictionary containing query results
+    """
     client = pymongo.MongoClient(
         "mongodb+srv://"+MONGO_CLUSTER_USERNAME+":"+MONGO_CLUSTER_PASSWORD+"@clusteredurell.z8aeh.mongodb.net/edurell?retryWrites=true&w=majority")
 
@@ -1291,7 +1750,16 @@ def testm(video_id):
 @app.route('/api/sparql_query_concepts/<video_id>')
 @auth.login_required
 def sparql_query_concepts(video_id, annotator_id):
+    """
+    Perform SPARQL query for concepts.
 
+    Parameters
+    ----------
+    video_id : str
+        Identifier for the video
+    annotator_id : str
+        Identifier for the annotator
+    """
     client = pymongo.MongoClient(
         "mongodb+srv://"+MONGO_CLUSTER_USERNAME+":"+MONGO_CLUSTER_PASSWORD+"@clusteredurell.z8aeh.mongodb.net/edurell?retryWrites=true&w=majority")
 
@@ -1347,7 +1815,16 @@ def sparql_query_concepts(video_id, annotator_id):
 
 
 def sparql_query_prerequisite(video_id, annotator_id):
+    """
+    Perform SPARQL query for prerequisites.
 
+    Parameters
+    ----------
+    video_id : str
+        Identifier for the video
+    annotator_id : str
+        Identifier for the annotator
+    """
     client = pymongo.MongoClient(
         "mongodb+srv://"+MONGO_CLUSTER_USERNAME+":"+MONGO_CLUSTER_PASSWORD+"@clusteredurell.z8aeh.mongodb.net/edurell?retryWrites=true&w=majority")
 
@@ -1409,7 +1886,16 @@ def sparql_query_prerequisite(video_id, annotator_id):
 
 
 def sparql_query_definitions(video_id, annotator_id):
+    """
+    Perform SPARQL query for definitions.
 
+    Parameters
+    ----------
+    video_id : str
+        Identifier for the video
+    annotator_id : str
+        Identifier for the annotator
+    """
     client = pymongo.MongoClient(
         "mongodb+srv://"+MONGO_CLUSTER_USERNAME+":"+MONGO_CLUSTER_PASSWORD+"@clusteredurell.z8aeh.mongodb.net/edurell?retryWrites=true&w=majority")
 
@@ -1476,7 +1962,9 @@ def sparql_query_definitions(video_id, annotator_id):
 
 
 if __name__ == '__main__':
-
+    """
+    Main entry point for the Flask application.
+    """
     print("***** EKEEL - Video Augmentation: main.py::__main__: Inizio ******")
 
     

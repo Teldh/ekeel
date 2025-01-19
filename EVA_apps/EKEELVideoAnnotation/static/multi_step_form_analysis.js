@@ -72,7 +72,7 @@ $('.video_radio').click(function(e) {
   e.preventDefault();
 
   let video_id = this.getAttribute("video")
-  let annotators = $videos[video_id].annotators
+  let annotators = videos_grouped[video_id].annotators
 
   document.getElementById(video_id).checked = true
 
@@ -82,7 +82,7 @@ $('.video_radio').click(function(e) {
     // document.getElementById('tab_annotator_selection').style.display = "none"
     // document.getElementById('tab_two_annotators_selection').style.display = "none"
     //document.getElementById('selected_type').innerHTML = analysisType
-    document.getElementById('selected_video').innerHTML = $videos[video_id].title
+    document.getElementById('selected_video').innerHTML = videos_grouped[video_id].title
     document.getElementById('annotators').innerHTML = ""
 
     for (let i in annotators) {
@@ -104,7 +104,7 @@ $('.video_radio').click(function(e) {
 
 
     //document.getElementById('selected_type_agreement').innerHTML = analysisType
-    document.getElementById('selected_video_agreement').innerHTML = $videos[video_id].title
+    document.getElementById('selected_video_agreement').innerHTML = videos_grouped[video_id].title
     document.getElementById('annotators').innerHTML = ""
     document.getElementById('annotator1').innerHTML = "<p class=\"titleLower\"> Select first annotator</p>"
     document.getElementById('annotator2').innerHTML = "<p class=\"titleLower\"> Select second annotator</p>"

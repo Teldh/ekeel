@@ -1,3 +1,43 @@
+"""
+Data handling module for the Flask server.
+
+This module provides functions to interact with the MongoDB database, retrieve and process data related to video annotations and concepts.
+
+Functions
+---------
+load_db()
+    Connects to the MongoDB database and returns the database object.
+delete_graphs(email)
+    Deletes all graph documents associated with the given email.
+get_conll(video_id)
+    Retrieves the CoNLL data for the specified video ID.
+get_sentences(parsed_conll, start_id, end_id)
+    Extracts sentences from the parsed CoNLL data between the specified start and end IDs.
+format_datetime(str)
+    Formats a datetime string by removing the type annotation.
+get_concept_list(annotator, video_id)
+    Retrieves a list of concepts for the specified annotator and video ID.
+get_concept_map(annotator, video_id)
+    Retrieves a concept map for the specified annotator and video ID.
+get_concept_vocabulary(annotator, video_id)
+    Retrieves the concept vocabulary for the specified annotator and video ID.
+get_concept_instants(annotator, video_id)
+    Retrieves concept instants for the specified annotator and video ID.
+get_concept_targets(concept_map, concept_id)
+    Retrieves the target concepts for the specified concept ID.
+get_concept_prerequisites(concept_map, concept_id)
+    Retrieves the prerequisite concepts for the specified concept ID.
+build_concept_without_sub_graph(concept_instants, concept_id)
+    Builds a concept object without subgraph information.
+build_concept_sub_graph_without_target_recursively(concept_map, concept_instants, concept_id)
+    Builds a subgraph for a concept recursively without target information.
+build_concept_sub_graph(concept_map, concept_instants, concept_id)
+    Builds a subgraph for a concept including target information.
+retrieve_primary_notions(concept_instance)
+    Retrieves primary notions from a concept instance.
+build_array(annotator, video_id)
+    Builds an array of concepts for the specified annotator and video ID.
+"""
 import pymongo
 
 
@@ -5,6 +45,14 @@ from conllu import parse
 from environment import MONGO_CLUSTER_USERNAME,MONGO_CLUSTER_PASSWORD
 
 def load_db():
+    """
+    Connects to the MongoDB database and returns the database object.
+
+    Returns
+    -------
+    db : pymongo.database.Database
+        The MongoDB database object.
+    """
     client = pymongo.MongoClient("mongodb+srv://"+MONGO_CLUSTER_USERNAME+":"+MONGO_CLUSTER_PASSWORD+"@clusteredurell.z8aeh.mongodb.net/edurell?retryWrites=true&w=majority")
     db = client.edurell
     return db
@@ -13,17 +61,62 @@ db = load_db()
 
 
 def delete_graphs(email):
+    """
+    Deletes all graph documents associated with the given email.
+
+    Parameters
+    ----------
+    email : str
+        The email address associated with the graph documents to delete.
+
+    Returns
+    -------
+    pymongo.results.DeleteResult
+        The result of the delete operation.
+    """
     collection = db.graphs
     if collection.find({"email":email}) is not None:
         return collection.delete_many({"email":email})
 
 def get_conll(video_id):
+    """
+    Retrieves the CoNLL data for the specified video ID.
+
+    Parameters
+    ----------
+    video_id : str
+        The ID of the video.
+
+    Returns
+    -------
+    str or None
+        The CoNLL data if found, otherwise None.
+    """
     collection = db.conlls
     if collection.find_one({"video_id":video_id}) is not None:
         return collection.find_one({"video_id":video_id})["conll"]
     else:
         return None
+    
+    
 def get_sentences(parsed_conll,start_id,end_id):
+    """
+    Extracts sentences from the parsed CoNLL data between the specified start and end IDs.
+
+    Parameters
+    ----------
+    parsed_conll : list
+        The parsed CoNLL data.
+    start_id : int
+        The starting sentence ID.
+    end_id : int
+        The ending sentence ID.
+
+    Returns
+    -------
+    str
+        The extracted sentences.
+    """
     sentences = ""
     start_id = int(start_id)
     end_id = int(end_id)
@@ -34,12 +127,41 @@ def get_sentences(parsed_conll,start_id,end_id):
             sentences += parsed_conll[i][k]["lemma"] +" "
     return sentences
 
-def format_datetime(str):
 
+def format_datetime(str):
+    """
+    Formats a datetime string by removing the type annotation.
+
+    Parameters
+    ----------
+    str : str
+        The datetime string to format.
+
+    Returns
+    -------
+    str
+        The formatted datetime string.
+    """
     s = str.split("^^")
     return s[0]
 
+
 def get_concept_list(annotator, video_id):
+    """
+    Retrieves a list of concepts for the specified annotator and video ID.
+
+    Parameters
+    ----------
+    annotator : str
+        The ID of the annotator.
+    video_id : str
+        The ID of the video.
+
+    Returns
+    -------
+    list
+        A list of concepts.
+    """
     collection = db.graphs
     pipeline = [
         {"$unwind": "$graph.@graph"},
@@ -75,20 +197,34 @@ def get_concept_list(annotator, video_id):
 
 
 def get_concept_map(annotator,video_id):
-     collection = db.graphs
+    """
+    Retrieves a concept map for the specified annotator and video ID.
 
-     pipeline = [
-        {"$unwind": "$graph.@graph"},
-        {
-            "$match":
-                {
-                    "video_id": str(video_id),
-                    "annotator_id": str(annotator),
-                    "graph.@graph.type": "oa:annotation",
-                    "graph.@graph.motivation": "edu:linkingPrerequisite",
-                }
+    Parameters
+    ----------
+    annotator : str
+        The ID of the annotator.
+    video_id : str
+        The ID of the video.
 
-        },
+    Returns
+    -------
+    list
+        A list representing the concept map.
+    """
+    collection = db.graphs
+
+    pipeline = [
+       {"$unwind": "$graph.@graph"},
+       {
+           "$match":
+               {
+                   "video_id": str(video_id),
+                   "annotator_id": str(annotator),
+                   "graph.@graph.type": "oa:annotation",
+                   "graph.@graph.motivation": "edu:linkingPrerequisite",
+               }
+       },
 
         {"$project":
             {
@@ -103,16 +239,15 @@ def get_concept_map(annotator,video_id):
                 "_id": 0
             }
         },
-
-
+    
         {"$sort": {"time": 1}}
 
     ]
 
-     aggregation = collection.aggregate(pipeline)
-     concept_map = list(aggregation)
+    aggregation = collection.aggregate(pipeline)
+    concept_map = list(aggregation)
 
-     for rel in concept_map:
+    for rel in concept_map:
         rel["prerequisite"] = rel["prerequisite"].replace("edu:","").replace("_"," ")
         rel["target"] = rel["target"].replace("edu:","").replace("_"," ")
         rel["weight"] = rel["weight"].replace("Prerequisite","")
@@ -120,10 +255,25 @@ def get_concept_map(annotator,video_id):
         if "xywh" not in rel:
             rel["xywh"] = "None"
 
-     return concept_map
+    return concept_map
 
 
 def get_concept_vocabulary(annotator, video_id):
+    """
+    Retrieves the concept vocabulary for the specified annotator and video ID.
+
+    Parameters
+    ----------
+    annotator : str
+        The ID of the annotator.
+    video_id : str
+        The ID of the video.
+
+    Returns
+    -------
+    dict or None
+        A dictionary representing the concept vocabulary, or None if not found.
+    """
     collection = db.graphs
 
     pipeline = [
@@ -176,7 +326,22 @@ def get_concept_vocabulary(annotator, video_id):
 
 
 def get_concept_instants(annotator, video_id):
-   pipeline = [
+    """
+    Retrieves concept instants for the specified annotator and video ID.
+
+    Parameters
+    ----------
+    annotator : str
+        The ID of the annotator.
+    video_id : str
+        The ID of the video.
+
+    Returns
+    -------
+    list
+        A list of concept instants.
+    """
+    pipeline = [
         {"$unwind": "$graph.@graph"},
         {
             "$match":
@@ -202,32 +367,78 @@ def get_concept_instants(annotator, video_id):
 
         {"$sort": {"time": 1}}]
 
-
-    
-   collection = db.graphs
-   aggregation = collection.aggregate(pipeline)
-   concept_instants = list(aggregation)
-   for c in concept_instants:
+    collection = db.graphs
+    aggregation = collection.aggregate(pipeline)
+    concept_instants = list(aggregation)
+    for c in concept_instants:
         c["start_time"] = format_datetime(c["start_time"])
         c["end_time"] = format_datetime(c["end_time"])
         c["concept_id"] = c["concept_id"].replace("edu:","").replace("_"," ")
-   return concept_instants
+    return concept_instants
+   
    
 def get_concept_targets(concept_map, concept_id):
+    """
+    Retrieves the target concepts for the specified concept ID.
+
+    Parameters
+    ----------
+    concept_map : list
+        The concept map.
+    concept_id : str
+        The ID of the concept.
+
+    Returns
+    -------
+    list
+        A list of target concepts.
+    """
     targets = []
     for relation in concept_map:
         if relation["prerequisite"] == concept_id:
             targets.append(relation["target"])
     return targets
 
+
 def get_concept_prerequisites(concept_map, concept_id):
+    """
+    Retrieves the prerequisite concepts for the specified concept ID.
+
+    Parameters
+    ----------
+    concept_map : list
+        The concept map.
+    concept_id : str
+        The ID of the concept.
+
+    Returns
+    -------
+    list
+        A list of prerequisite concepts.
+    """
     prerequisites = []
     for relation in concept_map:
         if relation["target"] == concept_id:
             prerequisites.append(relation["prerequisite"])
     return prerequisites
 
+
 def build_concept_without_sub_graph(concept_instants,concept_id):
+    """
+    Builds a concept object without subgraph information.
+
+    Parameters
+    ----------
+    concept_instants : list
+        The list of concept instants.
+    concept_id : str
+        The ID of the concept.
+
+    Returns
+    -------
+    dict
+        A dictionary representing the concept.
+    """
     concept = {"conceptName": "", 
                         "type": "", 
                         "description": "", 
@@ -243,7 +454,25 @@ def build_concept_without_sub_graph(concept_instants,concept_id):
             concept["endTimestamp"] = c["end_time"]
     return concept
 
+
 def build_concept_sub_graph_without_target_recursively(concept_map, concept_instants, concept_id):
+    """
+    Builds a subgraph for a concept recursively without target information.
+
+    Parameters
+    ----------
+    concept_map : list
+        The concept map.
+    concept_instants : list
+        The list of concept instants.
+    concept_id : str
+        The ID of the concept.
+
+    Returns
+    -------
+    dict
+        A dictionary representing the subgraph.
+    """
     sub_graph = {"targets": [], "prerequisites": [], "primary_notions": []}
     prerequisites = get_concept_prerequisites(concept_map, concept_id)
     prerequisites_concept = []
@@ -256,7 +485,25 @@ def build_concept_sub_graph_without_target_recursively(concept_map, concept_inst
         c["subgraph"] =  build_concept_sub_graph_without_target_recursively(concept_map,concept_instants, c["conceptName"])
     return sub_graph
 
+
 def build_concept_sub_graph(concept_map, concept_instants, concept_id):
+    """
+    Builds a subgraph for a concept including target information.
+
+    Parameters
+    ----------
+    concept_map : list
+        The concept map.
+    concept_instants : list
+        The list of concept instants.
+    concept_id : str
+        The ID of the concept.
+
+    Returns
+    -------
+    dict
+        A dictionary representing the subgraph.
+    """
     sub_graph = {"targets": [], "prerequisites": [], "primary_notions": [] }
     primary_targets = get_concept_targets(concept_map, concept_id)
     for c in primary_targets:
@@ -275,6 +522,19 @@ def build_concept_sub_graph(concept_map, concept_instants, concept_id):
     return sub_graph
 
 def retrieve_primary_notions(concept_instance):
+    """
+    Retrieves primary notions from a concept instance.
+
+    Parameters
+    ----------
+    concept_instance : dict
+        The concept instance.
+
+    Returns
+    -------
+    list
+        A list of primary notions.
+    """
     primary_notions = []
     for c in concept_instance["subgraph"]["prerequisites"]:
         if c["subgraph"]["prerequisites"] == []:
@@ -284,6 +544,21 @@ def retrieve_primary_notions(concept_instance):
     return primary_notions
 
 def build_array(annotator,video_id):
+    """
+    Builds an array of concepts for the specified annotator and video ID.
+
+    Parameters
+    ----------
+    annotator : str
+        The ID of the annotator.
+    video_id : str
+        The ID of the video.
+
+    Returns
+    -------
+    list
+        A list of concepts.
+    """
     concept_map = get_concept_map(annotator,video_id)
     concept_instants = get_concept_instants(annotator,video_id)
     primary_concept_list = get_concept_list(annotator,video_id)

@@ -1,34 +1,41 @@
 """
 Environment configuration module.
 
-This module loads environment variables from a `.env` file and provides access to these variables.
+Loads sensitive configuration variables from secrets.env file for MongoDB, email and security settings.
 
 Attributes
 ----------
 MONGO_CLUSTER_USERNAME : str
-    Username for the MongoDB cluster.
-MONGO_CLUSTER_PASSWORD : str
-    Password for the MongoDB cluster.
+    Username for MongoDB cluster access
+MONGO_CLUSTER_PASSWORD : str 
+    Password for MongoDB cluster access
 EMAIL_ACCOUNT : str
-    Email account used for sending emails.
+    Email account for sending notifications
 EMAIL_PASSWORD : str
-    Password for the email account.
+    Password for email account
 APP_SECRET_KEY : str
-    Secret key used for application security.
+    Secret key for application security
 APP_SECURITY_PASSWORD_SALT : str
-    Salt used for password hashing.
+    Salt value for password hashing
 
 Raises
 ------
 Exception
-    If the `.env` file is missing in the EVA_apps directory.
+    If secrets.env file is missing in EVA_apps/sharedSecrets directory
 """
+
+
 from dotenv import load_dotenv
 import os
 from pathlib import Path
 
-if not load_dotenv(Path(__file__).parent.parent.parent.parent.joinpath("sharedSecrets", "secrets.env")):
+env_file = Path(__file__).parent.parent.joinpath("sharedSecrets").joinpath("secrets.env")
+
+if not env_file.exists():
+    print(env_file)
     raise Exception(f"Missing .env file in EVA_apps directory, add it or ask to the supervisor of the project")
+
+load_dotenv(env_file)
 
 MONGO_CLUSTER_USERNAME = os.getenv("MONGO_CLUSTER_USERNAME")
 MONGO_CLUSTER_PASSWORD = os.getenv("MONGO_CLUSTER_PASSWORD")

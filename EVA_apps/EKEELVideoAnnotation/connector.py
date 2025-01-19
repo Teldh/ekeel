@@ -1,14 +1,18 @@
-'''
-This file is used by gunicorn on the server, its needed to run the app.
-'''
-from main import app
+"""
+EKEEL Video Annotation Connector
+===============================
+
+This module serves as the entry point for gunicorn server deployment.
+It configures system paths for gunicorn.
+
+
+"""
+
 import sys
 
-sys.path.insert(0,"/var/www/edurell/")
+def _configure_paths():
+    sys.path.insert(0, "/var/www/ekeel/")
+    print(sys.version)
+    print(sys.path)
 
-print (sys.version)
-print (sys.path)
-print ("Start")
-
-if __name__ == "__main__":
-        app.run()
+_configure_paths()

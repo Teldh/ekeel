@@ -163,7 +163,13 @@
     <script src="{{ url_for('static', filename='multi_step_form_analysis.js') }}"></script>
     <script src="{{ url_for('static', filename='search_video.js') }}"></script>
 
-    <script> let $videos = {{ video_choices|tojson }}; </script>
+    <script> 
+      let videos_grouped_by_id = {{ videos|tojson }}; 
+
+      let videos_grouped = {};
+      for (let video of videos_grouped_by_id)
+        videos_grouped[video["video_id"]] = video
+    </script>
 
 
     {% endblock %}
