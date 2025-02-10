@@ -23,7 +23,7 @@ For infos about linux services used in this project look [here](../../prerequisi
 
 ```bash
 cd /var/www/ekeel/EVA_apps/EkeelVideoAnnotation/
-/home/anaconda3/envs/myenv/bin/gunicorn --bind 127.0.0.1:5050 connector:app --timeout 180 --limit-request-line 0
+/home/torre/anaconda3/envs/ekeel_anno_env/bin/gunicorn --bind 127.0.0.1:5050 connector:app --timeout 180 --limit-request-line 0
 ```
 
 ### View gunicorn instances
@@ -36,7 +36,7 @@ ps -ef|grep gunicorn
 *(done automatically by "systemctl ekeel", use only for debugging)*
 ```bash
 cd /var/www/ekeel/EVA_apps/EkeelVideoAugmentation/src/flask-server
-sudo /home/anaconda3/envs/env-wp3/bin/python ./main.py
+sudo /home/torre/anaconda3/envs/ekeel_aug_env/bin/python ./main.py
 ```
 
 -----
@@ -44,3 +44,14 @@ sudo /home/anaconda3/envs/env-wp3/bin/python ./main.py
 - **Github Repository folder:** `/var/www/ekeel`
 - **Video Annotation folder:** `/var/www/ekeel/EVA_apps/EkeelVideoAnnotation/`
 - **Video Augmentation folder:** `/var/www/ekeel/EVA_apps/EkeelVideoAugmentation/`
+
+## In case of Server Reinstall or Things gone wrong
+Go inside EKEELVideoAnnotation app folder
+```bash
+cd /var/www/ekeel/EVA_apps/EKEELVideoAnnotation/
+```
+
+Create the Annotator conda environment
+```bash
+conda env create --file=conda_environment.yml
+```

@@ -8,6 +8,7 @@ It configures system paths for gunicorn.
 
 """
 
+from main import app
 import sys
 
 def _configure_paths():
@@ -16,3 +17,6 @@ def _configure_paths():
     print(sys.path)
 
 _configure_paths()
+
+if __name__ == "__main__":
+    app.run()

@@ -33,7 +33,7 @@ env_file = Path(__file__).parent.parent.joinpath("sharedSecrets").joinpath("secr
 
 if not env_file.exists():
     print(env_file)
-    raise Exception(f"Missing .env file in EVA_apps directory, add it or ask to the supervisor of the project")
+    raise Exception(f"Missing .env file in EVA_apps/sharedSecrets directory, add it or ask to the supervisor of the project")
 
 load_dotenv(env_file)
 
