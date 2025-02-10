@@ -10,6 +10,7 @@ cd /var/www/ekeel/EVA_apps/EKEELVideoAnnotation/
 
 Update prune (TODO not always works, sometimes happen that one has to delete environment and reinstall due to conflicts) and restart
 ```bash
+conda activate ekeel_anno_env
 conda env update --file conda_environment.yml --prune
 sudo systemctl restart ekeel
 ```

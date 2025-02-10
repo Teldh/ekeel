@@ -163,15 +163,7 @@ npm install --legacy-peer-deps
   npm start
   ```
 
-The app should start automatically in the default browser at this point..  
-(However the url to type in the browser is the following: http://localhost:3000/)
-
-
--------
-## Deploy and run on server
-
-Follow this guide:
-https://drive.google.com/file/d/1hta5qeYVr-2U9mcQdjT0-a_NacvhYUPC/view?usp=sharing
+The app should start automatically in the default browser at this point..
 
 
 --------

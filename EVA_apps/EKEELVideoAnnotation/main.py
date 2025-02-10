@@ -1190,4 +1190,4 @@ if __name__ == '__main__':
     
     address = '127.0.0.1'
     #_open_application_in_browser(address)    
-    app.run(host=address, threaded=True, debug=DEBUG) #, port=5050\
+    app.run(host=address, threaded=True, debug=DEBUG) # port=5000\

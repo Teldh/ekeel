@@ -1974,7 +1974,7 @@ if __name__ == '__main__':
 
     print("***** EKEEL - Video Augmentation: main.py::__main__: Fine ******")
 
-    app.run(debug=False)
+    app.run(port=5050, debug=False)
 
 
 
