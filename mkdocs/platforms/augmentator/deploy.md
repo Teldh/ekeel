@@ -11,7 +11,8 @@ cd /var/www/ekeel/EVA_apps/EkeelVideoAugmentation/
 Go inside flask-server folder and update dependencies from requirements.txt
 ```bash
 cd ./src/flask-server/
-sudo /home/anaconda3/envs/env-wp3/bin/pip install -r ./requirements.txt
+conda env update --file conda_environment.yml --prune
+sudo systemctl restart ekeel-aug
 ```
 
 Go inside react-app folder
@@ -41,9 +42,15 @@ sudo systemctl restart ekeel-wp3
 ```
 
 ## In case of reinstall on server
-Clone the repo
+After cloning the repo install nvm
 ```
-git clone https://github.com/
+sudo apt-get update
+sudo apt install curl
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+```
+Check the installation
+```
+nvm --version
 ```
 
-Follow [this guide](install.md) to install flask backend and react frontend
+Follow [this guide](install.md#front-end-reactjs) to install react front-end (specific section)

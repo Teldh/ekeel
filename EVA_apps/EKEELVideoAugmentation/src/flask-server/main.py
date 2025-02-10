@@ -30,12 +30,12 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = APP_SECRET_KEY
 
 #segment images directory
-app.config["CLIENT_IMAGES"] = "/var/www/edurell/EVA_apps/EKEELVideoAnnotation/static/videos"
+app.config["CLIENT_IMAGES"] = "/var/www/ekeel/EVA_apps/EKEELVideoAnnotation/static/videos"
 
 
 #mongo db config
 app.config['MONGODB_SETTINGS'] = {
-    'db': 'edurell',
+    'db': 'ekeel',
     'host': "mongodb+srv://"+MONGO_CLUSTER_USERNAME+":"+MONGO_CLUSTER_PASSWORD+"@clusteredurell.z8aeh.mongodb.net/edurell?retryWrites=true&w=majority"
 }
 
@@ -58,6 +58,7 @@ auth = HTTPBasicAuth(scheme='Custom')
 db = MongoEngine()
 db.init_app(app)
 mail = Mail(app)
+
 
 
 # generate a random string of lenght N composed of lowercase letters and numbers
@@ -97,7 +98,7 @@ def speech_from_youtube():
     videoId=req.get('video_id')
 
     collection = pymongo.MongoClient(
-        "mongodb+srv://"+MONGO_CLUSTER_USERNAME+":"+MONGO_CLUSTER_PASSWORD+"@clusteredurell.z8aeh.mongodb.net/edurell?retryWrites=true&w=majority").edurell.videos
+        "mongodb+srv://"+MONGO_CLUSTER_USERNAME+":"+MONGO_CLUSTER_PASSWORD+"@clusteredurell.z8aeh.mongodb.net/edurell?retryWrites=true&w=majority").ekeel.videos
     
     video_metadata = collection.find_one({"video_id": videoId})
     languages = []
@@ -110,9 +111,11 @@ def speech_from_youtube():
         start = get_integer_part(sub["start"])
         duration = get_integer_part(sub["duration"])
         subs_dict.append(
-            {"text": sub["text"],
-             "start": start,
-             "end": start + duration}
+            {
+                "text": sub["text"],
+                "start": start,
+                "end": start + duration
+            }
         )
     result = jsonify(subs_dict)
     return result
@@ -1251,7 +1254,7 @@ def GetVideoTypeAndPrerequisite():
         "mongodb+srv://"+MONGO_CLUSTER_USERNAME+":"+MONGO_CLUSTER_PASSWORD+"@clusteredurell.z8aeh.mongodb.net/edurell?retryWrites=true&w=majority")
 
     # retrieve from mongodb collection=graphs the all elements with the value of video_id
-    db = client.edurell
+    db = client.ekeel
     collection = db.graphs
 
     videos = Videos.objects()
@@ -1365,7 +1368,7 @@ def ConceptVideoData(video_id_list, concept_searched):
     #pymongo db config for query sparql
     client = pymongo.MongoClient(
             "mongodb+srv://"+MONGO_CLUSTER_USERNAME+":"+MONGO_CLUSTER_PASSWORD+"@clusteredurell.z8aeh.mongodb.net/edurell?retryWrites=true&w=majority")
-    dbsparql = client.edurell
+    dbsparql = client.ekeel
     # retrieve from mongodb collection=graphs the all elements with the value of video_id
     collection = dbsparql.graphs
 
@@ -1694,7 +1697,7 @@ def testm(video_id):
     client = pymongo.MongoClient(
         "mongodb+srv://"+MONGO_CLUSTER_USERNAME+":"+MONGO_CLUSTER_PASSWORD+"@clusteredurell.z8aeh.mongodb.net/edurell?retryWrites=true&w=majority")
 
-    db = client.edurell
+    db = client.ekeel
     collection = db.graphs
 
     cursor = collection.find({"video_id": video_id})
@@ -1763,7 +1766,7 @@ def sparql_query_concepts(video_id, annotator_id):
     client = pymongo.MongoClient(
         "mongodb+srv://"+MONGO_CLUSTER_USERNAME+":"+MONGO_CLUSTER_PASSWORD+"@clusteredurell.z8aeh.mongodb.net/edurell?retryWrites=true&w=majority")
 
-    db = client.edurell
+    db = client.ekeel
     collection = db.graphs
 
     query = {
@@ -1828,7 +1831,7 @@ def sparql_query_prerequisite(video_id, annotator_id):
     client = pymongo.MongoClient(
         "mongodb+srv://"+MONGO_CLUSTER_USERNAME+":"+MONGO_CLUSTER_PASSWORD+"@clusteredurell.z8aeh.mongodb.net/edurell?retryWrites=true&w=majority")
 
-    db = client.edurell
+    db = client.ekeel
     collection = db.graphs
 
     query = {
@@ -1899,7 +1902,7 @@ def sparql_query_definitions(video_id, annotator_id):
     client = pymongo.MongoClient(
         "mongodb+srv://"+MONGO_CLUSTER_USERNAME+":"+MONGO_CLUSTER_PASSWORD+"@clusteredurell.z8aeh.mongodb.net/edurell?retryWrites=true&w=majority")
 
-    db = client.edurell
+    db = client.ekeel
     collection = db.graphs
 
     query = {

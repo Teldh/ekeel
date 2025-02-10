@@ -35,7 +35,6 @@ from flask import render_template, jsonify, request, flash, redirect, url_for
 from flask_login import current_user, login_user, logout_user, login_required
 #from werkzeug.urls import url_parse
 from urllib.parse import urlparse
-from nltk import WordNetLemmatizer
 import bcrypt
 import random
 import string

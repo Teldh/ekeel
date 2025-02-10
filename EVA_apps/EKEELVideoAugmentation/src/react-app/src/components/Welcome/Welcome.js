@@ -50,8 +50,6 @@ export default class Welcome extends React.Component {
 
                 <div className="tutoContainer">
                     <img className="tuto" src={tuto} alt="tuto"></img>
-
-
                 </div>
             </div>
         )

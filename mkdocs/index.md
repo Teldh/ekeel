@@ -8,6 +8,11 @@ For deep overview of the system look [here](reports/System%20Overview.pdf) or cl
 
 ![System Overview](reports/System%20Overview.pdf){ type=application/pdf id="system-overview" style="min-height:70vh;width:100%; display:none" }
 
+The services are served through [NGINX](https://nginx.org/en/) as a reverse proxy. NGINX handles incoming HTTP requests, routing them to either Gunicorn (running the Video Annotation service on port 5050) or the Flask server (running Video Augmentation on its designated port). This setup allows both services to be accessible through a single domain, with NGINX managing the traffic routing, load balancing, and serving static files. 
+
+The services are maintained as system services using systemd, ensuring they automatically restart and remain available.
+
+
 For annotation protocol specifications look [here](reports/PREAP%20Annotation%20Protocol%20specifications.pdf) or click ->
 <button onclick="const spec = document.getElementById('protocol-specifications'); if(spec.style.display==='block'){ spec.style.display='none'; this.innerHTML=this.innerHTML.replace('Hide','Show'); } else { spec.style.display='block'; this.innerHTML=this.innerHTML.replace('Show','Hide'); }" style="cursor: pointer">
     `Show Annotation Protocol`
@@ -338,8 +343,7 @@ The system processes both video transcripts and visual elements to identify impo
 
 Users can interact with the generated knowledge graphs, explore concept definitions at specific timestamps, and visualize how different concepts relate to each other within the educational context. 
 
-!!! note
-    Currently not working for deprecation issues
+Can be accessed at [Ekeel Augmentator Webpage](http://ekeel-service.dibris.unige.it:5000)
 
 
 

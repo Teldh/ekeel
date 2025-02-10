@@ -54,7 +54,7 @@ def load_db():
         The MongoDB database object.
     """
     client = pymongo.MongoClient("mongodb+srv://"+MONGO_CLUSTER_USERNAME+":"+MONGO_CLUSTER_PASSWORD+"@clusteredurell.z8aeh.mongodb.net/edurell?retryWrites=true&w=majority")
-    db = client.edurell
+    db = client.ekeel
     return db
 
 db = load_db()
@@ -584,8 +584,8 @@ concept["subgraph"] = build_concept_sub_graph(concept_map, concept_instants, "sc
 concept["subgraph"]["primary_notions"] = retrieve_primary_notions(concept)
 
 print(build_array('60659634a320492e72f72598','sXLhYStO0m8'))
-"""
 conll = get_conll("sXLhYStO0m8")
 conll = parse(conll)
 sentences = get_sentences(conll,50,60)
 # print(sentences)
+"""
