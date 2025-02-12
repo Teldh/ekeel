@@ -39,6 +39,7 @@ import bcrypt
 import random
 import string
 import json
+from datetime import datetime, timezone
 
 
 from text_processor.conll import get_text
@@ -345,7 +346,7 @@ def video_selection():
     
     - Creates thumbnails
     
-    - Processes concepts and vocabulary
+    - Processes concepts and vocabulary based on user selection (edit his own or last annotator's annotations)
     
     - Sets up the annotation environment
 
@@ -367,17 +368,18 @@ def video_selection():
     print("***** EKEEL - Video Annotation: main.py::video_selection(): Inizio ******")
     form = addVideoForm()
     videos = mongo.get_videos(["video_id","title", "creator"])
-    annotator = current_user.mongodb_id
-    for video in videos:
-        annotation_status = mongo.get_annotation_status(annotator, video["video_id"])
-        if annotation_status is None:
-            annotation_status = "None"
-        else:
-            annotation_status = "Completed" if annotation_status["annotation_completed"] else "Progressing"
-        video["annotation_status"] = annotation_status
-
 
     if not form.validate_on_submit():
+        for video in videos:
+            annotations = mongo.get_annotation_infos(video["video_id"], 
+                                                     ["annotator_name", "annotator_id", "last_modification", "annotation_completed"])
+            status = "None"
+            for annotation in annotations:
+                if annotation["annotator_id"] == current_user.mongodb_id:
+                    status = "Completed" if annotation["annotation_completed"] else "In Progress"
+                annotation.pop("annotator_id")
+            video["my_annotation_status"] = status
+            video["has_annotation"] = "True" if any(annotations) else "False"
         return render_template('video_selection.html', form=form, videos=videos)
     
     try:
@@ -405,14 +407,32 @@ def video_selection():
             lemmatized_subtitles = html_interactable_transcript_word_level(data["transcript_data"]["text"])
         else:
             lemmatized_subtitles, all_lemmas = html_interactable_transcript_legacy(data["transcript_data"]["text"], conll_sentences, language)
-        annotator = current_user.complete_name
-        relations = mongo.get_concept_map(current_user.mongodb_id, video_id)
-        definitions = mongo.get_definitions(current_user.mongodb_id, video_id)
-        completed_graph = mongo.get_annotation_status(current_user.mongodb_id, video_id)
-        marked_completed = completed_graph is not None and completed_graph["annotation_completed"]
         
-        # Obtaining concept vocabulary from DB
-        conceptVocabulary  = mongo.get_vocabulary(current_user.mongodb_id, video_id)
+        if form.annotator.data == "self":
+        
+            annotator = current_user.complete_name
+            relations = mongo.get_concept_map(current_user.mongodb_id, video_id)
+            definitions = mongo.get_definitions(current_user.mongodb_id, video_id)
+            annotation_status = mongo.get_annotation_status(current_user.mongodb_id, video_id)
+            marked_completed = any(annotation_status) and annotation_status["annotation_completed"]
+            
+            
+            # Obtaining concept vocabulary from DB
+            conceptVocabulary  = mongo.get_vocabulary(current_user.mongodb_id, video_id)
+        
+        elif form.annotator.data == "last" or True: # default to last annotator
+            annotations = mongo.get_annotation_infos(video_id, 
+                                                     ["annotator_name", "annotator_id", "last_modification", "annotation_completed"])
+            annotations.sort(key=lambda x: x["last_modification"], reverse=True)
+            last_annotator = annotations[0]
+            relations = mongo.get_concept_map(last_annotator["annotator_id"], video_id)
+            definitions = mongo.get_definitions(last_annotator["annotator_id"], video_id)
+            annotation_status = mongo.get_annotation_status(last_annotator["annotator_id"], video_id)
+            marked_completed = any(annotation_status) and annotation_status["annotation_completed"]
+            
+            # Obtaining concept vocabulary from DB
+            conceptVocabulary  = mongo.get_vocabulary(last_annotator["annotator_id"], video_id)
+            annotator = last_annotator["annotator_name"]
         
         # If the concept vocabulary is in the DB then initialize concept to the ones of the vocabulary
         if conceptVocabulary is not None:
@@ -513,6 +533,7 @@ def get_concept_vocabulary():
 def upload_annotated_graph():
     """
     Upload and store annotated concept graph in JSON-LD format.
+    The annotator can be anyone based on the provided name.
 
     This endpoint receives annotation data for a video, converts it to JSON-LD format,
     and stores it in MongoDB. The annotations include concept relationships, vocabulary,
@@ -540,30 +561,33 @@ def upload_annotated_graph():
     """
     print("***** EKEEL - Video Annotation: main.py::upload_annotations(): Inizio ******")
     annotations = request.json
+    annotator_name = annotations["annotator"]
+    annotator = users.find_one({"name": annotator_name.split()[0], "surname": annotator_name.split()[1]})
+    if not annotator:
+        return {"done": False}
 
-    _, data = annotations_to_jsonLD(annotations,isAutomatic=False)
+    _, data = annotations_to_jsonLD(annotations, isAutomatic=False)
 
     data["video_id"] = annotations["id"]
-    data["annotator_id"] = current_user.mongodb_id
-    data["annotator_name"] = current_user.complete_name
-    data["email"] = current_user.email
+    data["annotator_id"] = str(annotator["_id"])
+    data["annotator_name"] = annotator["name"] + " " + annotator["surname"]
+    data["email"] = annotator["email"]
     data["conceptVocabulary"] = create_skos_dictionary(annotations["conceptVocabulary"], annotations["id"], "manu", annotations["language"])
     data["annotation_completed"] = annotations["is_completed"]
+    data["last_modification"] = datetime.now(timezone.utc).isoformat() + 'Z'
 
-    data["graph"]["@graph"].extend([{"id": x["id"], "type" : "skos:Concept"} for x in data["conceptVocabulary"]["@graph"]])
-
+    data["graph"]["@graph"].extend([{"id": x["id"], "type": "skos:Concept"} for x in data["conceptVocabulary"]["@graph"]])
 
     # inserting annotations on DB
-    try: 
-        mongo.insert_graph(data)    
+    try:
+        mongo.insert_graph(data)
     except Exception as e:
         print(e)
-        flash(e,"error")
-        return {"done":False}
+        flash(e, "error")
+        return {"done": False}
 
     print("***** EKEEL - Video Annotation: main.py::upload_annotations(): Fine ******")
-    # TODO show a message on screen
-    return {"done":True}
+    return {"done": True}
 
 
 # download graph on the manual annotator side

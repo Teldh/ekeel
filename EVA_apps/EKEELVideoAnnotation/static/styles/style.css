@@ -86,23 +86,31 @@ h1 {
   width: 100%;                   /* Optional: Set a specific width if needed */
 }
 
+.status-container {
+  display: flex;
+  justify-content: space-between; /* Ensures buttons are anchored to opposite sides */
+  align-items: end;           /* Aligns buttons vertically within the container */
+}
+
 .spacer,
 .btn-container, .status-container {
   height: 24px;
 }
 
 .btn-expanding.left {
-  justify-self: flex-start; /* Anchor to the left */
+  position: relative;
   right: 5%;
+  bottom: 10px;
 }
 
 .btn-expanding.right {
-  justify-self: flex-end;   /* Anchor to the right */
   left: 5%;
+  bottom: 10px;
 }
 
 .btn-expanding {
   background-color: dodgerblue;
+  position: relative;
   border: none;
   color: white;
   padding: 0px;
@@ -117,45 +125,27 @@ h1 {
   height: 30px;
   overflow: hidden;
   pointer-events: visible;
+  cursor: pointer;
   transition: width 0.4s ease, padding-right 0.6s ease, left 0.4s ease;
 }
 
-.btn-expanding.status{
-  /* Positioning it in the lower side */
-  position: relative;
-  cursor: default;
-  bottom: 10px;
-  left: 40%;
+.btn-expanding.top {
+  top: 5px;
 }
 
 .btn-expanding.delete {
   background-color: crimson;
-  position: relative;
-  top: 5px;
 }
 
 .btn-expanding.erase {
   background-color: rgb(155, 155, 155);
-  position: relative;
-  top: 5px;
 }
 
-.btn-expanding.left:hover {
-  width: 125px;
-  left: 6%;
-  padding-right: 5px;
-}
-
-.btn-expanding.right:hover {
-  width: 125px;
-  left: 6%;
-  padding-right: 5px;
-}
 
 .btn-expanding.right .checkmark {
   font-size: 30px;
-  padding-left: 64px;
-  padding-bottom: 4px;
+  padding-left: 65px;
+  padding-bottom: 3px;
 }
 
 .btn-expanding.left .checkmark {
@@ -164,36 +154,52 @@ h1 {
   padding-bottom: 4px;
 }
 
+.btn-expanding.top.left .icon {
+  padding-left: 108px;
+}
+
+.btn-expanding.bottom.right .icon {
+  padding-left: 81px;
+}
+
+.btn-expanding.bottom.right:hover .icon {
+  padding-left: 60px;
+}
+
+.btn-expanding.bottom.left .icon {
+  padding-left: 90px;
+}
+
 .btn-expanding .label {
   opacity: 0;
   margin-left: 10px;
-  transition: opacity 0.6s, padding 0.3s;
+  transition: opacity .6s;
+  flex-shrink: 0;
 }
-
-.btn-expanding:hover {
-  width: 160px;
-  left: 10%;
+.btn-expanding.left.top:hover {
+  width: 150px;
   padding-right: 40px;
 }
 
+
 .btn-expanding.left:hover {
-  width: 145px;
-  left: -5%;
-  padding-right: 45px;
+  width: 150px;
+  padding-right: 20px;
+}
+
+.btn-expanding.right:hover {
+  width: 150px;
+  padding-left: 8px;
 }
 
 .btn-expanding:hover .label {
   opacity: 1;
-  padding-right: 64px;
+  padding-right: 70px;
 }
 
 .btn-expanding .checkmark {
   font-size: 30px;
   padding-left: 100px;
-}
-
-.btn-expanding .annotating{
-  padding-left: 107px;
 }
 
 .btn-expanding.completed:hover{

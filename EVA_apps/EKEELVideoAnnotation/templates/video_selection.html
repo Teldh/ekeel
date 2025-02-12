@@ -78,34 +78,74 @@
               <label class="video_radio" video="{{ vid.video_id }}">
                 <input type="radio" name="video" value="{{ vid.video_id }}" id="{{ vid.video_id }}">
                 <div class="btn-container">
-                  {% if (vid.annotation_status == "Completed" or vid.annotation_status == "Progressing") %}
-                  <button class="btn-expanding erase left" title="remove your annotations on this video" onclick="deleteAnnotation('{{ vid.video_id }}')">
-                    <i class="fa-solid fa-eraser annotating"></i>
-                    <span class="label">Unannotate</span>
-                  </button>
+                  {% if (vid.my_annotation_status != "None") %}
+                    <button class="btn-expanding top left erase" title="remove your annotations on this video" onclick="deleteAnnotation('{{ vid.video_id }}')">
+                      <i class="fa-solid fa-eraser icon"></i>
+                      <span class="label">Unannotate</span>
+                    </button>
                   {% else %}
-                  <span class="spacer"></span>
+                    <span class="spacer"></span>
                   {% endif %}
-                  <button class="btn-expanding delete right" title="Delete this video and all associated annotations" onclick="deleteVideo('{{ vid.video_id }}')">
+                  <button class="btn-expanding top right delete" title="Delete this video and all associated annotations" onclick="deleteVideo('{{ vid.video_id }}')">
                     <span class="checkmark">&#9932;</span>
                     <span class="label">Delete</span>
                   </button>
                 </div>
                 <img src="https://img.youtube.com/vi/{{ vid.video_id }}/hqdefault.jpg" video="{{ vid.video_id }}">
                 <div class="status-container">
-                  {% if vid.annotation_status == "Completed" %}
-                    <button class="btn-expanding status completed" disabled>
-                      <span class="checkmark">&#10004;</span>
-                      <span class="label">Annotated</span>
+                  {% if vid.my_annotation_status == "In Progress" %}
+                    <button class="btn-expanding bottom left" title="edit your annotation of this video">
+                      <i class="fa-solid fa-pen-to-square icon"></i>
+                      <span class="label">Edit your</span>
                     </button>
-                  {% elif vid.annotation_status == "Progressing" %}
-                    <button class="btn-expanding status annotating" disabled>
-                      <i class="fa-solid fa-pen-to-square annotating"></i>
-                      <span class="label">Annotating</span>
+                    <button class="btn-expanding bottom right" title="edit the most recent annotation of this video" onclick="editLastAnnotation('{{ vid.video_id }}')">
+                      <span class="icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="10 10 80 80" width="20" height="20">
+                          <path fill="white" d="m20.418 50c0-16.34 13.242-29.582 29.582-29.582s29.582 13.242 29.582 29.582-13.242 29.582-29.582 
+                          29.582-29.582-13.242-29.582-29.582zm29.582-37.082c-20.48 0-37.082 16.602-37.082 37.082s16.602 37.082 37.082 37.082 37.082-16.602 
+                          37.082-37.082-16.602-37.082-37.082-37.082zm3.75 20.414c0-2.0703-1.6797-3.75-3.75-3.75s-3.75 1.6797-3.75 3.75v11.492c0 4.3086 
+                          1.7109 8.4414 4.7578 11.488l4.6758 4.6719c1.4609 1.4648 3.8359 1.4648 5.3008 0s1.4648-3.8398 0-5.3008l-4.6719-4.6758c-1.6406-1.6406-2.5625-3.8633-2.5625-6.1836z" 
+                          fill-rule="evenodd" stroke="white" stroke-width="3"/>
+                        </svg>
+                      </span>
+                      <span class="label">Edit last</span>
                     </button>
-                  {% else %}
-                    <!-- Placeholder to maintain alignment -->
-                    <span></span>
+                  {% elif vid.my_annotation_status == "Completed" %}
+                    <button class="btn-expanding bottom left completed" title="edit your annotation of this video">
+                      <i class="fa-solid fa-pen-to-square icon"></i>
+                      <span class="label">Edit your</span>
+                    </button>
+                    <button class="btn-expanding bottom right" title="edit the most recent annotation of this video" onclick="editLastAnnotation('{{ vid.video_id }}')">
+                      <span class="icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="10 10 80 80" width="20" height="20">
+                          <path fill="white" d="m20.418 50c0-16.34 13.242-29.582 29.582-29.582s29.582 13.242 29.582 29.582-13.242 29.582-29.582 
+                          29.582-29.582-13.242-29.582-29.582zm29.582-37.082c-20.48 0-37.082 16.602-37.082 37.082s16.602 37.082 37.082 37.082 37.082-16.602 
+                          37.082-37.082-16.602-37.082-37.082-37.082zm3.75 20.414c0-2.0703-1.6797-3.75-3.75-3.75s-3.75 1.6797-3.75 3.75v11.492c0 4.3086 
+                          1.7109 8.4414 4.7578 11.488l4.6758 4.6719c1.4609 1.4648 3.8359 1.4648 5.3008 0s1.4648-3.8398 0-5.3008l-4.6719-4.6758c-1.6406-1.6406-2.5625-3.8633-2.5625-6.1836z" 
+                          fill-rule="evenodd" stroke="white" stroke-width="3"/>
+                        </svg>
+                      </span>
+                      <span class="label">Edit last</span>
+                    </button>
+                  {% elif vid.my_annotation_status == "None" %}
+                    {% if vid.has_annotation == "True" %}
+                      <span></span>
+                      <button class="btn-expanding bottom right" title="edit the most recent annotation of this video" onclick="editLastAnnotation('{{ vid.video_id }}')">
+                        <span class="icon">
+                          <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="10 10 80 80" width="20" height="20">
+                            <path fill="white" d="m20.418 50c0-16.34 13.242-29.582 29.582-29.582s29.582 13.242 29.582 29.582-13.242 29.582-29.582 
+                            29.582-29.582-13.242-29.582-29.582zm29.582-37.082c-20.48 0-37.082 16.602-37.082 37.082s16.602 37.082 37.082 37.082 37.082-16.602 
+                            37.082-37.082-16.602-37.082-37.082-37.082zm3.75 20.414c0-2.0703-1.6797-3.75-3.75-3.75s-3.75 1.6797-3.75 3.75v11.492c0 4.3086 
+                            1.7109 8.4414 4.7578 11.488l4.6758 4.6719c1.4609 1.4648 3.8359 1.4648 5.3008 0s1.4648-3.8398 0-5.3008l-4.6719-4.6758c-1.6406-1.6406-2.5625-3.8633-2.5625-6.1836z" 
+                            fill-rule="evenodd" stroke="white" stroke-width="3"/>
+                          </svg>
+                        </span>
+                        <span class="label">Edit last</span>
+                      </button>
+                    {% else %}
+                      <!-- Placeholder to maintain alignment -->
+                      <span></span>
+                    {% endif %}
                   {% endif %}
                 </div>
                   <p class="video_title" video="{{ vid.video_id }}">{{ vid.title }}</p>
@@ -145,6 +185,7 @@
                 {{ form.csrf_token }}
                  <div class="form-group">
                    {{ form.url(class_='form-control', autocomplete="off", id="youtube_url")}}
+                   {{ form.annotator(class_='form-control', autocomplete="off", id="annotator")}}
                  </div>
               <button type="submit" class="btn btn-dodgerblue float-right">
                   Add Video & Start Annotation
@@ -182,6 +223,8 @@
 
     bgDarknessOnOverlay = .8
 
+    document.getElementById("annotator").value = "self"
+
     function addVideoLoading(){
         document.getElementById("videos").style.display = "none"
         // background loading can be shown but it's not pretty with the front loading scene
@@ -214,11 +257,19 @@
     $(".video_radio").click(function(e) {
         if ($(e.target).closest('.btn-expanding').length)
           return;
-        selectVideoLoading()
+        selectVideoLoading();
         e.preventDefault();
         document.getElementById("youtube_url").value = "https://www.youtube.com/watch?v=" + this.getAttribute("video")
         document.getElementById("urlForm").submit();
     });
+
+
+    function editLastAnnotation(video_id){
+      selectVideoLoading();
+      document.getElementById("youtube_url").value = "https://www.youtube.com/watch?v=" + video_id
+      document.getElementById("annotator").value = "last"
+      document.getElementById("urlForm").submit();
+    }
 
 
 </script>

@@ -100,9 +100,12 @@ def insert_graph(data):
         collection.insert_one(data)
     else:
         new_graph = {"$set": 
-            {"graph": data["graph"], 
-             "conceptVocabulary": data["conceptVocabulary"], 
-             "annotation_completed": data["annotation_completed"]}}
+                {   "graph": data["graph"], 
+                    "conceptVocabulary": data["conceptVocabulary"], 
+                    "annotation_completed": data["annotation_completed"],
+                    "last_modification": data["last_modification"]
+                }
+            }
         collection.update_one(query, new_graph)
 
     print("***** EKEEL - Video Annotation: db_mongo.py::insert_graph(): Fine ******")    
@@ -463,6 +466,28 @@ def get_annotation_status(annotator, video_id):
         Annotation completion status if found
     """
     return db.graphs.find_one({"video_id":video_id, "annotator_id":str(annotator)},{"annotation_completed":1}) 
+
+def get_annotation_infos(video_id, fields:list=None):
+    """
+    Get annotation information for a video.
+
+    Parameters
+    ----------
+    video_id : str
+        Video identifier
+    fields : list, optional
+        Specific fields to retrieve
+
+    Returns
+    -------
+    list
+        List of annotation information
+    """
+    if fields is None:
+        fields = []
+    fields = {field:1 for field in fields}
+    fields.update({"_id":0})
+    return list(db.graphs.find({"video_id":video_id}, fields))
 
 def delete_annotation(annotator, video_id):
     db.graphs.delete_one({"annotator_id": annotator, "video_id":video_id})

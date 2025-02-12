@@ -21,10 +21,13 @@ class addVideoForm(FlaskForm):
     ----------
     url : TextField
         Video URL input field
+    annotator : wtforms.fields.StringField
+        Annotator name input field with a required validator.
     submit : SubmitField
         Form submission button
     """
     url = TextField('Url', validators=[InputRequired()])
+    annotator = TextField('Annotator', validators=[InputRequired()])
     submit = SubmitField('Start annotate')
 
 

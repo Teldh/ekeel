@@ -92,6 +92,9 @@ function uploadManuGraphOnDB(){
         data : js_data
     }).done(function(result) {
         console.log(result)
+        if(result.done == false) {
+            alert("Error in saving graph!")
+        }
         //if(result.done == true) {
         //    savedText.textContent = "Saved graph successfully!"
         //    savedText.style.color = "green";
