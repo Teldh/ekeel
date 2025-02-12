@@ -94,7 +94,7 @@
                 <img src="https://img.youtube.com/vi/{{ vid.video_id }}/hqdefault.jpg" video="{{ vid.video_id }}">
                 <div class="status-container">
                   {% if vid.my_annotation_status == "In Progress" %}
-                    <button class="btn-expanding bottom left" title="edit your annotation of this video">
+                    <button class="btn-expanding bottom left" title="edit your annotation of this video" onclick="editYourAnnotation('{{ vid.video_id }}')">
                       <i class="fa-solid fa-pen-to-square icon"></i>
                       <span class="label">Edit your</span>
                     </button>
@@ -111,7 +111,7 @@
                       <span class="label">Edit last</span>
                     </button>
                   {% elif vid.my_annotation_status == "Completed" %}
-                    <button class="btn-expanding bottom left completed" title="edit your annotation of this video">
+                    <button class="btn-expanding bottom left completed" title="edit your annotation of this video" onclick="editYourAnnotation('{{ vid.video_id }}')">
                       <i class="fa-solid fa-pen-to-square icon"></i>
                       <span class="label">Edit your</span>
                     </button>
@@ -257,12 +257,15 @@
     $(".video_radio").click(function(e) {
         if ($(e.target).closest('.btn-expanding').length)
           return;
-        selectVideoLoading();
         e.preventDefault();
-        document.getElementById("youtube_url").value = "https://www.youtube.com/watch?v=" + this.getAttribute("video")
-        document.getElementById("urlForm").submit();
+        editYourAnnotation(this.getAttribute("video"));
     });
 
+    function editYourAnnotation(video_id){
+      selectVideoLoading();
+      document.getElementById("youtube_url").value = "https://www.youtube.com/watch?v=" + video_id
+      document.getElementById("urlForm").submit();
+    }
 
     function editLastAnnotation(video_id){
       selectVideoLoading();
@@ -270,7 +273,6 @@
       document.getElementById("annotator").value = "last"
       document.getElementById("urlForm").submit();
     }
-
 
 </script>
 {% endblock %}
