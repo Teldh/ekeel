@@ -105,10 +105,11 @@ function deleteAnnotation(video_id){
       closeConfirmBox()
       // Target the button associated with this video_id
       let button = $(`label[video=${video_id}] .btn-expanding.erase`);
-      let statusButton = $(`label[video=${video_id}] .btn-expanding.status`);
+      let statusButton = $(`label[video=${video_id}] .btn-expanding.bottom.left`);
 
       // Start the animation (e.g., fade out)
       statusButton.fadeOut(300, function() {
+
         // Perform the AJAX request after the fadeOut
         $.ajax({
           url: '/annotator/delete_annotation',
@@ -117,9 +118,13 @@ function deleteAnnotation(video_id){
           dataType: 'json',
           data: JSON.stringify({ "video_id": video_id })
         }).done(function(result) {
-        
+          
+          $(statusButton).replaceWith('<span class="spacer"></span>');
           $(button).fadeOut(300, function() {
             $(button).replaceWith('<span class="spacer"></span>');
+            
+            // Reload the page to avoid inconsistencies between the server and the client
+            location.reload();
           });
 
         });
