@@ -414,7 +414,7 @@ def video_selection():
             relations = mongo.get_concept_map(current_user.mongodb_id, video_id)
             definitions = mongo.get_definitions(current_user.mongodb_id, video_id)
             annotation_status = mongo.get_annotation_status(current_user.mongodb_id, video_id)
-            marked_completed = any(annotation_status) and annotation_status["annotation_completed"]
+            marked_completed = annotation_status is not None and annotation_status["annotation_completed"]
             
             
             # Obtaining concept vocabulary from DB
