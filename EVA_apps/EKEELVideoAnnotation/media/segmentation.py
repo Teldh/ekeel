@@ -182,6 +182,8 @@ class VideoAnalyzer:
                 if not vidcap.isOpened() or not min((vidcap.get(cv2.CAP_PROP_FRAME_WIDTH),vidcap.get(cv2.CAP_PROP_FRAME_HEIGHT))) >= 360:
                     raise Exception("Video does not have enough definition to find text")
                 break
+        if not os.path.isfile(folder_path.joinpath(video_id+".mp4")):
+            raise Exception("Video has not been correctly downloaded")
   
 
     def _create_keyframes(self,start_times,end_times,S,seconds_range, image_scale:float=1,create_thumbnails=True):

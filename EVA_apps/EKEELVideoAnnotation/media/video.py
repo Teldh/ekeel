@@ -28,8 +28,7 @@ from typing import Tuple
 from media.image import ImageClassifier,COLOR_BGR,COLOR_RGB,COLOR_GRAY
 from pathlib import Path
 
-VIDEOS_PATH = Path(__file__).parent.parent.joinpath("static","videos")
-
+VIDEOS_PATH = Path(__file__).parent.parent / "static" / "videos"
 
 class LocalVideo:
     """

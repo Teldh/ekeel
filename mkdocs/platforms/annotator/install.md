@@ -3,6 +3,9 @@
 
 The document provides instructions for setting up the EKEEL Video Annotation project locally on your pc.
 
+è stato testato per funzionare su Ubuntu 22 <-> 24. 
+Non testato (e non funzionante) su windows ma solo su linux
+
 ## First Installation
 
 ### Prerequisites: ffmpeg
